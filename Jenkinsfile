@@ -28,4 +28,11 @@ node {
 		unstash 'source'
 		sh 'cp target/*.jar /opt/deploy'
 	}
+	stage('emailext') {
+		attachLog: true
+		body 'Test'
+		compressLog true
+		subject 'Test'
+		to: 'sgandra@altimetrik.com'
+	}
 }
