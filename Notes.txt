@@ -1,0 +1,20 @@
+Jenkins URL:
+http://localhost:8080
+Login Credentials:
+admin
+811be75708b14c71829613fa556a528f
+
+Process to check-in Jenkinsfile:
+1. Modify the file:
+C:\Users\Jeyashree\HelloSpringWorld\Jenkinsfile
+2. Go to command prompt and cd to the following path:
+cd C:\Users\Jeyashree\HelloSpringWorld
+3. Check-in the changes to git with the following command:
+git add .
+git commit -m "Modified Jenkinsfile"
+git push -u origin master
+Enter the user name: shyamnarayan2001@gmail.com
+
+pwd: Chennai@123 (C in caps)
+4. Now go to Jenkins sample_pipeline and hit "Build Now" option on the left hand side
+
