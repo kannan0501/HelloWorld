@@ -2,7 +2,7 @@ node {
 	checkout scm
 	env.PATH ="${tool 'Maven3'}/bin:${env.PATH}"
 	emailext attachLog: true, body: 'Test', compressLog: true, subject: 'Test', to: 'sgandra@altimetrik.com' 
-	properties([pipelineTriggers([cron('* */5 * * *')])]) 
+	properties([pipelineTriggers([cron('0 10 * * *')])]) 
 	stash excludes: 'target/', includes: '**', name: 'source'
 	stage('validate') {
 		sh 'mvn validate'
