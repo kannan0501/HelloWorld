@@ -1,30 +1,31 @@
-node {
-    def server = Artifactory.newServer url: SERVER_URL, credentialsId: CREDENTIALS
-    def rtGradle = Artifactory.newGradleBuild()
-
-    stage 'Build'
-        git url: 'https://github.com/jfrogdev/project-examples.git'
-
-    stage 'Artifactory configuration'
-        rtGradle.tool = GRADLE_TOOL // Tool name from Jenkins configuration
-        rtGradle.deployer repo:'libs-snapshot-local',  server: server
-        rtGradle.resolver repo:'remote-repos', server: server
-
-    withEnv(['DONT_COLLECT=FOO']){
-        stage 'Config Build Info'
-            def buildInfo = Artifactory.newBuildInfo()
-            buildInfo.env.capture = true
-            buildInfo.env.filter.addInclude("*")
-            buildInfo.env.filter.addExclude("DONT_COLLECT*")
-
-        stage 'Extra gradle configurations'
-            rtGradle.deployer.artifactDeploymentPatterns.addExclude("*.war")
-            rtGradle.usesPlugin = true // Artifactory plugin already defined in build script
-
-        stage 'Exec Gradle'
-            rtGradle.run rootDir: "gradle-examples/4/gradle-example/", buildFile: 'build.gradle', tasks: 'clean artifactoryPublish', buildInfo: buildInfo
-
-        stage 'Publish build info'
-            server.publishBuildInfo buildInfo
-    }
+node { 
+	checkout scm
+	env.PATH ="${tool 'Maven3'}/bin:${env.PATH}"
+	stash excludes: 'target/', includes: '**', name: 'source'
+	emailext attachLog: true,body: 'Test', compressLog: true, subject: 'Test jenkins Pipelines', to: 'sgandra@altimetrik.com,snachiappan@altimetrik.com' 
+	properties([pipelineTriggers([cron('0 10 * * *')])])
+	//checkout([$class: 'GitSCM', branches: [[name: '*/master']], browser: [$class: 'Phabricator', repo: 'ssh://phvcs@platformworks.altimetrik.com:2222/diffusion/9/hachon.git', repoUrl: 'https://platformworks.altimetrik.com/'], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[]]])
+	stage('validate') {
+		sh 'mvn validate'
+	} 
+	stage('compile') {
+		sh 'mvn compile'
+	} 
+	stage('package') {
+		 sh 'mvn clean package -DskipTests'
+	}
+	stage('install') {
+		sh 'mvn clean install'
+	} 
+	stage('test') {
+		parallel 'integration': {
+			sh 'mvn clean verify'
+		}, 'quality': {
+			//sh 'mvn sonar:sonar'
+			} 
+	} 
+	stage('deploy') {
+		unstash 'source'
+		sh 'cp target/*.jar /opt/deploy'
+	}
 }
