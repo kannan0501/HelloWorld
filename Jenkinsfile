@@ -1,6 +1,6 @@
 node { 
 	checkout scm
-	env.PATH ="${tool 'maven3'}/bin:${env.PATH}"
+	env.PATH ="${tool 'Maven3'}/bin:${env.PATH}"
 	stash excludes: 'target/', includes: '**', name: 'source'
 	emailext attachLog: true,body: 'Test', compressLog: true, subject: 'Test jenkins Pipelines', to: 'sgandra@altimetrik.com,snachiappan@altimetrik.com' 
 	properties([pipelineTriggers([cron('0 10 * * *')])])
